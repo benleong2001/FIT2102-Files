@@ -1,0 +1,122 @@
+-- >>> parse longLambdaP "(λx.xx)"
+-- Result >< \x.xx
+--
+
+-- >>> parse longLambdaP "(λx.(λy.xy(xx)))"
+-- Result >< \xy.xy(xx)
+--
+
+-- >>> parse longLambdaP "xx"
+-- UnexpectedChar 'x'
+--
+
+-- >>> parse longLambdaP "(λb.(λt.(λf.ftb)))"
+-- Result >< \btf.ftb
+--
+
+-- >>> parse longLambdaP "(λx.x(xx)x)"
+-- Result >< \x.x(xx)x
+--
+
+-- >>> parse longLambdaP "(λx.(λy.x))"
+-- Result >< \xy.x
+--
+
+-- >>> parse longLambdaP "(λx.(λy.x(x(xy))))"
+-- Result >< \xy.x(x(xy))
+--
+
+-- >>> parse longLambdaP "(λx.x(xx))"
+-- Result >< \x.x(xx)
+--
+
+-- >>> parse longLambdaP "(λx.(λy.xy(xx)y))"
+-- Result >< \xy.xy(xx)y
+--
+-- >>> parse longLambdaP "((λx.x(xx)x)(λy.y(yy)y))"
+-- Result >< (\x.x(xx)x)\y.y(yy)y
+--
+
+-- >>> parse longLambdaP "(λx.x(xx)x)(λy.y(yy)y)"
+-- Result >< (\x.x(xx)x)\y.y(yy)y
+--
+
+-- >>> parse longLambdaP "((λx.xx)(λy.yy))"
+-- Result >< (\x.xx)\y.yy
+--
+
+-- >>> parse longLambdaP "((λx.x)(λx.x))"
+-- Result >< \x.x\a.a
+--
+-- >>> parse longLambdaP "((λz.z)(λz.z)(λz.z))"
+-- Result >< \z.z\a.a\b.b
+--
+
+-- >>> parse longLambdaP "((λx.x)(λy.(yy)y)(λz.z(zz)))"
+-- UnexpectedChar '('
+--
+
+-- >>> parse longLambdaP "((λx.x)(λy.yyy)(λz.z(zz)))"
+-- Result >< \x.x\y.yyy\z.z(zz)
+--
+
+-- >>> parse longLambdaP "(λbt.(λf.btf)))"
+-- UnexpectedChar '\955'
+--
+
+-- >>> parse longLambdaP "((λz.z)(λz.z)(λz.z)(λz.z))"
+-- Result >< \z.z\a.a\b.b\c.c
+--
+
+-- >>> parse longLambdaP "(λx.(λy.x(λz.z)))"
+-- UnexpectedChar '\955'
+--
+---------------------------------shortLambdaP-------------------------------------------
+-- >>> parse shortLambdaP "λx.xx"
+-- Result >< \x.xx
+--
+-- >>> parse shortLambdaP "λxy.xy(xx)"
+-- Result >< \xy.xy(xx)
+--
+-- >>> parse shortLambdaP "λx.x(λy.yy)"
+-- Result >< \x.x\y.yy
+--
+-- >>> parse shortLambdaP "(λx.x)(λy.yy)"
+-- Result >< (\x.x)\y.yy
+--
+-- >>> parse shortLambdaP "(λx.x)(λy.yy)(λz.zzz)"
+-- Result >< (\x.x)(\y.yy)\z.zzz
+--
+-- >>> parse shortLambdaP "(λx.x(xx))"
+-- Result >< \x.x(xx)
+--
+-- >>> parse shortLambdaP "λx.x(xx)x"
+-- Result >x< \x.x(xx)
+--
+-- >>> parse shortLambdaP "λx.x(λy.yy).y"
+-- Result >.y< \x.x\y.yy
+--
+-- >>> parse shortLambdaP "λx.λy.y"
+-- Result >< \xy.y
+--
+-- >>> parse shortLambdaP "λx.(λy.y)"
+-- Result >< \xy.y
+--
+-- >>> parse shortLambdaP "(λx.xx)"
+-- Result >< \x.xx
+--
+-- >>> parse shortLambdaP "(λx.(λy.xy(xx)))"
+-- Result >< \xy.xy(xx)
+--
+-- >>> parse shortLambdaP "λx.x(xx)x(λy.y(yy)y)"
+-- Result >< \x.x(xx)x\y.y(yy)y
+--
+-- >>> parse shortLambdaP "(λx.x)λy.yy"
+-- Result >< (\x.x)\y.yy
+--
+-- >>> parse shortLambdaP "(λx.x)(λy.y)(λx.xx)"
+-- Result >< (\x.x)(\y.y)\x.xx
+--
+-- >>> parse shortLambdaP "λx.xλy.yλz.zz"
+-- Result >< \x.x\y.y\z.zz
+--
