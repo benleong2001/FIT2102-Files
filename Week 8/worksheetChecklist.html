@@ -1,0 +1,225 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tutorial 8 Worksheet</title>
+        <script id="setTheme">
+          const dark = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+          document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+        </script>
+        <link id="style" href="./style.css" rel="stylesheet" />
+        <link href="./libs/mocha.css" rel="stylesheet" />
+        <link rel="stylesheet"
+            href="./libs/dracula.css">
+        <script src="./libs/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" async
+          src="./libs/mathjax.js">
+        </script>
+
+    </head>
+    <body>
+        <div class="sliderWrapper">
+            <div><p>Dark Mode&nbsp;&nbsp;</p></div>
+              <label class="switch">
+                  <input type="checkbox" id="light_vs_dark_toggle">
+                  <span class="slider"></span>
+              </label>
+          </div>
+        <div class="left-div">
+            <div class="description">
+                <h1>
+                    Week 8 - Functor and Applicative
+
+                </h1>
+                <h1>
+                    Preamble
+                </h1>
+                <p>
+                This week, we attack real functional programming: Functors and Applicatives, two of the main building blocks of functional programming theory.
+                </p>
+                </p>Please read <a href="https://tgdwyer.github.io/haskell3/">the course notes</a> before proceeding with this worksheet.<p>
+                Functor and Applicative are typeclasses like the ones we saw last week (Eq, Ord, Show, etc).
+                That is they are properties you apply on types.
+                Types, by themselves, cannot enforce certain properties it is therefore the programmer’s
+                task to implement them.
+                </p><p>
+                When we implemented other typeclasses we implicitly used a concept called “minimal complete definition.”
+                That is, the minimum definition(s) – or function(s) – that are needed to express a property.
+                Functor and Applicative are no different.
+                Read the about Functor and Applicative below and then complete
+                the definitions in Functor.hs and Applicative.hs and then the exercises in Exercises.hs.
+                </p><p>
+                NOTE: The last exercise in each file is marked “tricky”.
+                The solutions are each only a couple of lines of code,
+                but really require you to think about the definitions of Functor and Applicative.
+                 </p>
+                 <p>
+                     In all cases look very carefully at the tests (the lines starting with <code>-- >>></code>).
+                     You can run these as previously with doctest or by copy-pasting into GCHi.
+                     Also look very closely at the comments in the file marked <code>-- /Hint/</code>.
+                     All the necessary information is supplied, but it requires you to think carefully about types and how
+                     Functor and Applicative allow you to work with values and functions inside specific contexts.
+                 </p>
+                <h1>
+                    Functor
+                </h1>
+                <img src="images/Functor.png"/><a href="http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html"/>image source</a>
+                <h2>
+                    Minimal complete definition
+                </h2>
+
+                <p>The minimal definition of a functor is <$> (fmap)</p>
+                <p>Note that fmap stands for “functor map” because map was already reserved, it is not flatMap</p>
+                <pre><code>(<$>) :: (a -> b) -> f a -> f b</code></pre>
+                <h2>Laws</h2>
+                The Law of Identity:
+                $$\forall x : (\mathrm{id}~\text{<\$>}~x) \equiv x$$
+                The Law of Composition:
+                $$\forall f,g,x : (f~\circ~g~\text{<\$>}~x)~\equiv~(f~\text{<\$>}~(g~\text{<\$>}~x))$$
+                <p>
+                    So a functor takes a function, an element in a context, applies the function to the element, and returns the result in the context
+                </p>
+                <h1>
+                    Applicative
+                </h1>
+                <img src="images/Applicative.png">
+                <a href="http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html"/>image source</a>
+                <h2>Minimal Complete Definition</h2>
+                <p>The minimal definition of an applicative functor is pure and <*> (apply):</p>
+                <pre><code>pure :: a -> f a
+(<*>) :: f (a -> b) -> f a -> f b</code></pre>
+<p>
+    So, an applicative takes a function within a context, an element within the same context, applies the function, and returns the results in the context.
+</p>
+                <h2>Laws</h2>
+                <p>
+                    All instances of the Applicative type-class must satisfy four laws.
+                    Note that these laws are not checked by the compiler, but Applicative instances must
+                    comply to produce the expected behaviour.
+                    You can <a href="https://en.wikibooks.org/wiki/Haskell/Applicative_functors">read about the Applicative Laws</a>
+                    if you are interested, but they are a little more subtle than the basic Functor laws above, and it is
+                    not essential to understand them to be able to use <code><*></code> in Haskell or to create the basic
+                    instances in this tutorial.  Rather, please look closely at the expected outputs in the tests.
+                </p>
+                <!-- <p>
+                    The law of left identity
+                </p>
+                <p>
+                    $$\forall x : \mathrm{pure}~\mathrm{id}~\text{<∗>}~x~\equiv~x $$
+                </p>
+                <p>
+                    The law of composition
+                </p>
+                <p>
+                    $$\forall a,b,c : ((\circ)~\text{<\$>}~a~\text{<∗>}~b~\text{<∗>}~c)~\equiv~(a~\text{<∗>}~(b~\text{<∗>}~c)) $$
+                </p>
+                <p>
+                    The law of homomorphism
+                </p>
+                <p>
+                    $$\forall f , x : \mathrm{pure}~f~\text{<∗>}~\mathrm{pure}~x ≡ \mathrm{pure}~(f~x) $$
+                </p>
+                <p>
+                    The law of interchange
+                </p>
+                <p>
+                    $$∀x,y : y~\text{<∗>}~\mathrm{pure}~x ≡ \mathrm{pure}~y~\text{<∗>}~x$$
+                </p> -->
+                <p>
+                    Now that the fundamentals are out of the way, you will implement some functions that leverage the functor and applicative typclasses:
+                </p>
+                <button class="collapsible"><h1>
+                    Exercise 1: Functor
+                </h1></button>
+                <div class="content">
+                    <p>
+                        Your first task will be to finish off the definitions of Functor for different types
+                    </p>
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 2: Applicative
+                </h1></button>
+                <div class="content">
+                    <p>
+                        Your next task will be to finish off the definitions of Applicative for different types
+                    </p>
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 3: Exercises
+                </h1></button>
+                <div class="content">
+                    <p>
+                        Your next task will be to finish off some exercises
+                    </p>
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 4: Parsing with Applicative
+                </h1></button>
+                <div class="content">
+                    <p>
+                        Your next task will be to finish off the parsing functions. Make sure to use the functions and instances from the previous sections!
+                    </p>
+                    <p>
+                        The parses you write have some cryptic names, but we'll see what they do next week...
+                    </p>
+                </div>
+
+        </div>
+        <div class="right-div">
+            <div id="mocha" class="test"></div>
+        </div>
+        <script>
+          // persist vertical scroll position
+          const scrollY = sessionStorage.getItem("scrollY");
+          if (scrollY !== null) {
+            window.scroll(0, scrollY);
+          }
+          window.onunload = () => sessionStorage.setItem("scrollY", window.scrollY);
+
+          const collapsibles = Array.from(document.getElementsByClassName("collapsible"));
+          // get collapse status
+          const collapseStatus = sessionStorage.getItem("collapseStatus") ?
+                  JSON.parse(sessionStorage.getItem("collapseStatus")) :
+                  collapsibles.map(coll => coll.classList.contains("active"));
+
+          collapsibles.forEach((coll, i) => {
+            // expand if previously expanded
+            if (collapseStatus[i]) {
+              coll.classList.add("active");
+              const content = coll.nextElementSibling;
+              content.style.display = "block";
+            }
+
+            coll.addEventListener("click", function () {
+              this.classList.toggle("active")
+              collapseStatus[i] = !collapseStatus[i];
+              const content = this.nextElementSibling
+              content.style.display = collapseStatus[i] ? "block" : "none"
+              // save collapse status on change
+              sessionStorage.setItem("collapseStatus", JSON.stringify(collapseStatus));
+            });
+          });
+
+          // persist dark/light choice in localstorage
+          const checkbox = document.getElementById('light_vs_dark_toggle')
+          const darkCSS = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+          if (darkCSS) {
+            checkbox.checked = true;
+          }
+
+          checkbox.addEventListener('change', (event) => {
+            const dark = event.target.checked
+            document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+            localStorage.setItem("darkCSS", JSON.stringify(dark))
+          });
+
+        </script>
+    </body>
+</html>
