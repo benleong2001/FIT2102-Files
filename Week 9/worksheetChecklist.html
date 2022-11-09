@@ -1,0 +1,235 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tutorial 9 Worksheet</title>
+        <script id="setTheme">
+          const dark = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+          document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+        </script>
+        <link id="style" href="./style.css" rel="stylesheet" />
+        <link href="./libs/mocha.css" rel="stylesheet" />
+        <link rel="stylesheet"
+            href="./libs/dracula.css">
+        <script src="./libs/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" async
+          src="./libs/mathjax.js">
+        </script>
+
+    </head>
+    <body>
+        <div class="sliderWrapper">
+            <div><p>Dark Mode&nbsp;&nbsp;</p></div>
+              <label class="switch">
+                  <input type="checkbox" id="light_vs_dark_toggle">
+                  <span class="slider"></span>
+              </label>
+          </div>
+        <div class="left-div">
+            <div class="description">
+                <h1>
+                    Week 9 - Foldable and Traversable
+
+                </h1>
+                <h1>
+                    Preamble
+                </h1>
+                <p>
+                In this week’s tutorial, we will explore the power of Foldable and Traversable structures.
+                Please read the Course Notes on <a href="https://tgdwyer.github.io/haskell4">Foldable and Traversible</a> before proceeding.
+                <h1>Hints</h1>
+                <p>
+                    <b>Follow the types</b>: Many of the exercises this week require a solid understanding of the types expected of each expression you need to write.  A useful GHC feature that will help you with this is type holes which allow GHCi to tell you the expected type at a location.
+                </p>
+                <p>
+                    For example, if you are defining an addThreeIntegers function:
+                </p>
+                <pre><code>addThreeIntegers :: Integer -> Integer -> Integer -> Integer
+addThreeIntegers x y z = (+) (??? x y) z</code></pre>
+                <p>
+                    and you're not sure what you should put at "???", put a hole "_" there:
+                </p>
+                <pre><code>addThreeIntegers x y z = (+) (_ x y) z</code></pre>
+                <p>
+                    When you run GHCi, it will tell you the type of the hole:
+                </p>
+                <pre><code>error:
+    Found hole: _ :: Integer -> Integer -> Integer</code></pre>
+                <h1>
+                </h1>
+                <button class="collapsible"><h1>
+                    Exercise 1: Folds
+                </h1></button>
+                <div class="content">
+                    <p>
+                        You have to implement all functions in Fold.hs.
+                    </p><p>
+                    First, we will explore the power of fold. Folding is a very basic operation in functional programming. A lot of functions are actually implemented as folds.
+                    </p><p>
+                    In our case, we will focus on a right-fold. A right-fold takes a binary function which merges elements, a base case, and a list of elements to return the fold of these elements through the function.
+                    </p>
+                    <pre><code>foldr ::        -- right-fold
+(a -> b -> b) -- binary function
+-> b          -- base case
+-> [a]        -- list of elements
+-> b          -- result</code></pre>
+                    <p>
+                        Another way to look at a right-fold is: replace all the cons (:) in a list with a function and the nil [] with the base case.
+                    </p>
+                    <pre><code>-- Sum the elements of a list with fold
+[1, 2, 3, 4, 5]        -- Rewrite using cons
+1 : 2 : 3 : 4 : 5 : [] -- Fold (+) on the list
+1 + 2 + 3 + 4 + 5 + 0  -- 0 is the base case
+15                     -- Apply</code></pre>
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 2: Foldable
+                </h1></button>
+                <div class="content">
+                <p><b>Interlude: Monoid</b></p>
+                <p>
+                    A Monoid is a type with an associative binary operation that follows the law of identity. Monoids allow folding operations using the binary function (<>).
+                </p>
+                <p>
+                    Left identity
+                    $$\text{mempty} <> x ≡ x$$
+                    Right identity
+                    $$x <> \text{mempty} ≡ x$$
+                    Associativity
+                    $$x <> (y <> z) ≡ (x <> y) <> z$$
+                </p>
+                <p>
+                    Monoids, conveniently, provide a default value for their operation.
+                </p>
+                <pre><code> mempty :: (Monoid m) => m</code></pre>
+                <p>
+                    Monoids also provide a generalised fold, also called mconcat.
+                </p>
+                <pre><code> mconcat :: (Monoid m) => [m] -> m</code></pre>
+                <p><b>Foldable</b></p>
+                <p>
+                    You have to write the body and the type signature for all Foldable Typeclasses in Traversable.hs.
+                </p>
+                <p>
+                    A foldable is a structure which can be reduced to a single value. Think of it as a structure on which we can use foldr. To define an instance of foldable, we need to define the following function:
+                </p>
+                <pre><code>foldMap :: (Monoid m) => (a -> m) -> t a -> m</code></pre>
+                <p>
+                    That is, given a monoid and a function to fold an item into it, and a sequence of non-monoidal items, we can reduce the sequence to a single element.
+                    Defining an instance of foldable allows us to derive a number of very useful functions for free. For example, a generalised fold, both left- and right-fold, a list converter, a length function, element existence, etc.:
+                </p>
+                <pre><code>class Foldable t where
+fold   :: (Monoid m) => t m -> m
+length :: t a -> Int
+toList :: t a -> [a]
+elem   :: (Eq a) => a -> t a -> Bool</code></pre>
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 3: Traversable
+                </h1></button>
+                <div class="content">
+                    <p>
+                    You have to write the body and the type signature for all Traversable typeclasses in Traversable.hs.
+                    </p>
+                    <p>
+                        Traversable are structures which can be traversed while performing an action. A traversable has to be a foldable and a functor. They are defined using traverse.
+                    </p>
+                    <pre><code> traverse :: (Traversable t, Applicative f) => (a-> f b) -> t a -> f (t b)</code></pre>
+                    Instances of Traversible also have some laws with which they must comply.
+                    You can <a href="https://en.wikibooks.org/wiki/Haskell/Traversable">read about these laws</a> but it is not essential to remember the laws to use Traversible.
+                    <!-- <p>
+                        All instances of traversable have to respect the following laws (you don’t have to memorise these - but it’s useful to know that they exist):
+                    </p>
+                    <p>
+                        The law of identity.
+                    </p>
+                    <p>
+                        $$\text{traverse}~Id=Id$$
+                    </p>
+                    <p>
+                        The law of naturality:
+                    </p>
+                    <p>
+                        $$ t \circ \text{traverse}~f=\text{traverse}~(t \circ f) $$<br>
+                        Where t is an Applicative transformation:
+                        <pre><code> t :: (Applicative f, Applicative g) => f a -> g a.</code></pre>
+                    </p>
+                    <p>
+                    The law of composition.
+                    </p>
+                    <p>
+                    $$\text{traverse}(\text{Compose} \circ \textit{fmap g} \circ f)= \text{Compose} \circ fmap (traverse g)\circ(traverse f)$$
+                    </p> -->
+                </div>
+
+                <button class="collapsible"><h1>
+                    Exercise 4: A useful operator
+                </h1></button>
+                <div class="content">
+                <p>Please implement the $> operator in Exercises.hs</p>
+                </div>
+                <button class="collapsible"><h1>
+                    Exercise 5: More parsers
+                </h1></button>
+                <div class="content">
+                <p>You will now get to implement some non-trivial parsers and apply the traverse function in Parser.hs</p>
+                </div>
+        </div>
+        <div class="right-div">
+            <div id="mocha" class="test"></div>
+        </div>
+        <script>
+
+          // persist vertical scroll position
+          const scrollY = sessionStorage.getItem("scrollY");
+          if (scrollY !== null) {
+            window.scroll(0, scrollY);
+          }
+          window.onunload = () => sessionStorage.setItem("scrollY", window.scrollY);
+
+          const collapsibles = Array.from(document.getElementsByClassName("collapsible"));
+          // get collapse status
+          const collapseStatus = sessionStorage.getItem("collapseStatus") ?
+                  JSON.parse(sessionStorage.getItem("collapseStatus")) :
+                  collapsibles.map(coll => coll.classList.contains("active"));
+
+          collapsibles.forEach((coll, i) => {
+            // expand if previously expanded
+            if (collapseStatus[i]) {
+              coll.classList.add("active");
+              const content = coll.nextElementSibling;
+              content.style.display = "block";
+            }
+
+            coll.addEventListener("click", function () {
+              this.classList.toggle("active")
+              collapseStatus[i] = !collapseStatus[i];
+              const content = this.nextElementSibling
+              content.style.display = collapseStatus[i] ? "block" : "none"
+              // save collapse status on change
+              sessionStorage.setItem("collapseStatus", JSON.stringify(collapseStatus));
+            });
+          });
+
+          // persist dark/light choice in localstorage
+          const checkbox = document.getElementById('light_vs_dark_toggle')
+          const darkCSS = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+          if (darkCSS) {
+            checkbox.checked = true;
+          }
+
+          checkbox.addEventListener('change', (event) => {
+            const dark = event.target.checked
+            document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+            localStorage.setItem("darkCSS", JSON.stringify(dark))
+          });
+
+        </script>
+    </body>
+</html>
