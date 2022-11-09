@@ -1,0 +1,341 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tutorial 7 Worksheet</title>
+    <script id="setTheme">
+      const dark = localStorage.getItem("darkCSS")
+        ? JSON.parse(localStorage.getItem("darkCSS"))
+        : false;
+      document.documentElement.setAttribute(
+        "data-theme",
+        dark ? "dark" : "light"
+      );
+    </script>
+    <link id="style" href="./style.css" rel="stylesheet" />
+    <link href="./libs/mocha.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./libs/dracula.css" />
+    <script src="./libs/highlight.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad();
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    </script>
+    <script type="text/javascript" async src="./libs/mathjax.js"></script>
+  </head>
+  <body>
+    <div class="sliderWrapper">
+      <div><p>Dark Mode&nbsp;&nbsp;</p></div>
+      <label class="switch">
+        <input type="checkbox" id="light_vs_dark_toggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="left-div">
+      <div class="description">
+        <h1>Week 7</h1>
+        <h1>Preamble</h1>
+        <p>
+          As usual, please read
+          <a href="https://tgdwyer.github.io/haskell2/"
+            >the relevant section from the course notes</a
+          >
+          before attempting these exercises. In this week's tutorial we will see
+          better ways to handle undefined behaviours. Last week, we realised
+          that in some cases you cannot reliably define the behaviour of a
+          function. For example, to define the minimum of an empty binary tree:
+          would you use the maximum integer? an error? 0? None of these really
+          make sense.
+        </p>
+        <p>
+          One of your tasks, now, will be to write the type of your functions,
+          where last week they were given to you. We will start using
+          polymorphism in our code instead of fixed types. Polymorphism is one
+          of the strong suits of Haskell, allowing users to write a single
+          function that will work on multiple types instead of having to define
+          one per possible type. By convention, a polymorphic type variable is a
+          lower case letter such as <code>a</code> (compared to
+          <code>&lt;T&gt;</code> in TypeScript).
+        </p>
+        <p>
+          Finally, you will learn to use typeclasses. Typeclasses are a bit like
+          interfaces in TypeScript. A typeclass in Haskell is a guarantee that a
+          type has certain functions. Some commonly encountered examples of
+          typeclasses are:
+        </p>
+        <p></p>
+        <ul class="list">
+          <li>
+            `Show`: enable the display of elements of the type. It must
+            implement a function called ‘show’ that converts an element of the
+            type to a String.
+          </li>
+          <li>
+            `Read`: allow an object to be created from its String representation
+            - must implement the ‘read’ function.
+          </li>
+          <li>
+            `Eq`: enable equality testing between objects of the type with (==)
+            and (!=) operators.
+          </li>
+          <li>And many more that you can explore online, or see the end.</li>
+        </ul>
+        <h1>Reminder</h1>
+        <p>
+          Once you have downloaded and extracted the code, from the terminal
+          open in the top level of the unzipped code directory, then run the
+          tests like so:
+        </p>
+        <pre><code>$ stack build
+$ stack test</code></pre>
+        <p>There will be lots of tests failing at first.</p>
+        <p>
+          You can also try the functions in your code interactively from
+          Haskell's interactive environment GHCi:
+        </p>
+        <pre><code>$ stack ghci</code></pre>
+        <p>
+          It should load all the source files in the current project. If you
+          modify your code and want to test it, you need to:
+        </p>
+        <pre><code>GHCi> :reload</code></pre>
+        <p>Or just:</p>
+        <pre><code>GHCi> :r</code></pre>
+        <p>
+          GHCi is a REPL (Read-Eval-Print-Loop), which means that whatever code
+          you type in it is interpreted as if it were source code; loading a
+          file is equivalent to copy/pasting it. You can also load a particular
+          file with the :load/:l command:
+        </p>
+        <pre><code>*Main Lib> :l src/Maybes.hs
+[1 of 1] Compiling Maybes           ( src/Maybes.hs, interpreted )
+Ok, modules loaded: Maybes
+*Maybes> :r
+[1 of 1] Compiling Maybes           ( src/Maybes.hs, interpreted )
+Ok, modules loaded: Maybes.
+                </code></pre>
+        <p>
+          The interactive environment gives you a number of tools to explore the
+          code, typing `:type/:t` will give you the type of a function; to have
+          more information, you can use `:info/:i`.
+        </p>
+        <pre><code>*Maybes> :t isJust
+isJust :: Maybe a -> Bool
+*Maybes> :i isJust
+isJust :: Maybe a -> Bool       -- Defined at src/Maybes.hs:16:1
+                </code></pre>
+        <p>
+          Using GHCi makes debugging faster as each time you reload your file(s)
+          it will inform you of any syntax or type error.
+        </p>
+        <p>
+          You can also type code directly within GHCi and use its results either
+          by copy/pasting into your code, or using `it` to recall the last
+          results.
+        </p>
+        <pre><code>Prelude> map (+1) [1..10]
+[2,3,4,5,6,7,8,9,10,11]
+Prelude> map (*2) it
+[4,6,8,10,12,14,16,18,20,22]
+                </code></pre>
+        <p>
+          Once you have finished writing the code for a file, you can test it
+          using:
+        </p>
+        <pre><code>$ stack exec doctest src/<i>file</i>.hs</code></pre>
+        <p>If you want to test the whole project, you can use:</p>
+        <pre><code>$ stack test</code></pre>
+
+        <button class="collapsible"><h1>Exercise 1: Maybes</h1></button>
+        <div class="content">
+          <p>
+            This exercise is about type manipulation rather than actual
+            computation, your first foray into functional exercises. You need to
+            implement a number of helper functions around `Maybe` constructs.
+          </p>
+          <p>Hint: A general piece of advice in FP: "follow the types."</p>
+          <p>
+            <task
+              >Question: Can you write a function with the following
+              signature?</task
+            >
+          </p>
+          <pre><code>mystery :: Maybe a -> a</code></pre>
+        </div>
+
+        <button class="collapsible">
+          <h1>Exercise 2: Rock Paper Scissors</h1>
+        </button>
+        <div class="content">
+          <p>
+            The goal of this exercise is to create your own typeclasses. A
+            typeclass is a *property* of a type. By default, types in Haskell do
+            not do anything, you cannot even compare two instances of the same
+            type together! However, you can derive a number of typeclasses by
+            default. E.g., you can derive `Eq` on all sum types without any
+            custom code.
+          </p>
+          <p>
+            To create an instance of `Ord` it is necessary to define a *complete
+            definition* using either: `<=` or `>=` but it requires `Eq`; or use
+            `compare`. The latter is the most compact way to define the ordering
+            of a type, it has the following definition:
+          </p>
+          <pre><code>data Ordering =  EQ | LT | GT
+compare :: Ord a => a -> a -> Ordering</code></pre>
+          <p>
+            You will implement a (simple) game of Rock-Paper-Scissors,
+            <task
+              >first define the necessary type classes then two functions</task
+            >:
+          </p>
+          <ol class="list">
+            <li><task>`whoWon` takes two plays and return a results.</task></li>
+            <li>
+              <task
+                >`countResult` takes two series of plays and a result, and
+                returns how many times we get the result</task
+              >
+            </li>
+          </ol>
+          <p>
+            An important feature of this exercise is to try to write
+            "declarative" code. Declarative code tends to leverage functional
+            constructs as much as possible, think: `map`, `filter`, etc.
+          </p>
+        </div>
+
+        <button class="collapsible">
+          <h1>Exercise 3: Implementing the competition</h1>
+        </button>
+        <div class="content">
+          <p>
+            <task>Implement `competition` to return which player won.</task>
+          </p>
+          <pre><code>competition :: Plays -> Plays -> Result</code></pre>
+          <p>
+            <i>Hint: Use countResult!</i>
+          </p>
+        </div>
+
+        <button class="collapsible">
+          <h1>Exercise 4: Haskell Programming</h1>
+        </button>
+        <div class="content">
+          <p>
+            We will be doing some more <i>Hoogling</i> today. Similar to last
+            week you will be using hoogle to find appropriate functions to solve
+            tasks. You will not get any marks on these tasks if you use
+            recursion.
+          </p>
+          <p>
+            Hint: The solutions for these exercises are quite concise, make use
+            of the useful functions as much as possible!
+          </p>
+          <ul class="list">
+            <li><task>sortList: sort a list by length</task></li>
+            <ul>
+              <li>
+                Hint:
+                <span style="color: transparent !important"
+                  >A useful function here is <i>sortOn</i></span
+                >
+              </li>
+            </ul>
+            <li>
+              <task
+                >longestList: find the largest list by length in a list of
+                lists</task
+              >
+            </li>
+            <li>
+              <task
+                >sumProduct: find the sum of taking the product element by
+                element of two lists</task
+              >
+            </li>
+            <li>
+              <task
+                >groupEqual: Group consecutive elements which are equal after
+                applying function</task
+              >
+            </li>
+            <ul>
+              <li>
+                Hint:
+                <span style="color: transparent !important"
+                  >A useful function here is <i>groupBy</i> and <i>on</i></span
+                >
+              </li>
+            </ul>
+            <li>
+              <task
+                >nestedMap: Apply function to every element in a nested
+                list</task
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="right-div">
+      <div id="mocha" class="test"></div>
+    </div>
+    <script>
+      // persist vertical scroll position
+      const scrollY = sessionStorage.getItem("scrollY");
+      if (scrollY !== null) {
+        window.scroll(0, scrollY);
+      }
+      window.onunload = () => sessionStorage.setItem("scrollY", window.scrollY);
+
+      const collapsibles = Array.from(
+        document.getElementsByClassName("collapsible")
+      );
+      // get collapse status
+      const collapseStatus = sessionStorage.getItem("collapseStatus")
+        ? JSON.parse(sessionStorage.getItem("collapseStatus"))
+        : collapsibles.map((coll) => coll.classList.contains("active"));
+
+      collapsibles.forEach((coll, i) => {
+        // expand if previously expanded
+        if (collapseStatus[i]) {
+          coll.classList.add("active");
+          const content = coll.nextElementSibling;
+          content.style.display = "block";
+        }
+
+        coll.addEventListener("click", function () {
+          this.classList.toggle("active");
+          collapseStatus[i] = !collapseStatus[i];
+          const content = this.nextElementSibling;
+          content.style.display = collapseStatus[i] ? "block" : "none";
+          // save collapse status on change
+          sessionStorage.setItem(
+            "collapseStatus",
+            JSON.stringify(collapseStatus)
+          );
+        });
+      });
+
+      // persist dark/light choice in localstorage
+      const checkbox = document.getElementById("light_vs_dark_toggle");
+      const darkCSS = localStorage.getItem("darkCSS")
+        ? JSON.parse(localStorage.getItem("darkCSS"))
+        : false;
+      if (darkCSS) {
+        checkbox.checked = true;
+      }
+
+      checkbox.addEventListener("change", (event) => {
+        const dark = event.target.checked;
+        document.documentElement.setAttribute(
+          "data-theme",
+          dark ? "dark" : "light"
+        );
+        localStorage.setItem("darkCSS", JSON.stringify(dark));
+      });
+    </script>
+  </body>
+</html>
