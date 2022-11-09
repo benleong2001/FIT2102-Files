@@ -19,3 +19,9 @@ Installing Stack
 3. Click on the embedded Windows Installer link
 4. Download the installer
 5. Open File Explorer and run the installer (application) to install stack
+
+Checking Environment Variables (and their values)
+1. Go to the search bar next to the Start button
+2. Search for "Edit the system environment variables" and select it
+3. Click on environment variables on the window that popped up
+4. The new window will show all Environment Variables and their values
