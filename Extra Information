@@ -1,0 +1,21 @@
+Downloading Node.js
+1. Go to https://nodejs.org/en/download/
+2. Select Windows Installer
+3. Download package
+
+Installing Haskell
+1. Go to https://www.haskell.org/ghcup/guide/#certificate-authority-errors-curl
+2. Copy the code at the bottom
+    It should be like the line below, if not exactly the same
+Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;Invoke-Command -ScriptBlock ([ScriptBlock]::Create((Invoke-WebRequest https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1 -UseBasicParsing))) -ArgumentList $true,$false,$false,$false,$false,$false,$false,"","","","",$true
+3. Open Windows Powershell
+    Can be run as user or admin, doesn't really matter
+4. Paste the code and run it
+5. Wait for the code to finish running. This could take quite a while
+
+Installing Stack
+1. Go to https://docs.haskellstack.org/en/stable/#how-to-install-stack
+2. Select Windows
+3. Click on the embedded Windows Installer link
+4. Download the installer
+5. Open File Explorer and run the installer (application) to install stack
