@@ -1,0 +1,271 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial 10 Worksheet</title>
+    <script id="setTheme">
+        const dark = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+        document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+    </script>
+    <link id="style" href="./style.css" rel="stylesheet" />
+    <link href="./libs/mocha.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./libs/dracula.css">
+    <script src="./libs/highlight.min.js"></script>
+    <script>
+        hljs.initHighlightingOnLoad();
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+    <script type="text/javascript" async src="./libs/mathjax.js">
+    </script>
+
+</head>
+
+<body>
+    <div class="sliderWrapper">
+        <div>
+            <p>Dark Mode&nbsp;&nbsp;</p>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="light_vs_dark_toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <div class="left-div">
+        <div class="description">
+            <h1>
+                Week 10 - Warm and Fuzzy Things
+
+            </h1>
+            <h1>
+                Preamble
+            </h1>
+            <p>
+                This week, we tackle Monads, a less restrictive approach to effectful computation in Haskell. Monads are
+                infamous as they allow “side-effects in Haskell.” Which is not true. Monads allow us to encapsulate
+                effects within side-effect free computation by wrapping the results with a known effect. We retain
+                referential transparency, laziness, and all perks of functional programming.
+            </p>
+            <p>
+                As we have seen over the past few weeks, once you are in a context, you cannot get out of it. This is
+                what monadic computation brings to the table: a way to apply functions that start with a pure value and
+                return a wrapped result. As such, they sit in-between functors and applicatives.
+            </p>
+            <p>
+                Like “Monoid”, the term “Monad” comes from category theory. But, according to the father of Haskell, his
+                biggest mistake was not calling them: “warm fuzzy things,” because the term monad scares people into
+                thinking they are hard.
+            </p>
+            <p>
+                Be sure to read the <a href="https://tgdwyer.github.io/monad/">Chapter on Monad from the Course
+                    Notes</a> before attempting this tutorial.
+            </p>
+            <p>
+                The two parts of this week’s work, first exploring the definition of Monad,
+                and then using Monad to perform File I/O, are described below one after the other,
+                but they are actually independent and you may do them in the other order if it helps you get your head
+                around Monad. The first part, following the trend of previous weeks, requires you to implement instances
+                of Monad’s bind function for Maybe and List. The second requires you to use the built in Monad
+                implementations from Control.Monad for IO.
+            </p>
+
+            <button class="collapsible">
+                <h1>
+                    Exercise 1: Monad
+                </h1>
+            </button>
+            <div class="content">
+                <p>
+                    In this module you will implement a few examples of monad typeclasses. A monad instance has to
+                    respect one law:
+                </p>
+                <p>
+                    The law of associativity:
+                </p>
+                <p>
+                    <code>(m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)</code>
+                </p>
+                <p>
+                    Monad’s minimal definition is:
+                </p>
+                <p>
+                    <code>(>>=) :: m a -> (a -> m b) -> m b</code>
+                </p>
+                <p>
+                    That is: given a wrapped element and a function that produces an effect, apply the function.
+                </p>
+                <p>
+                    <task>Task 1: in "src/Monad.hs" work through the basic instances for Monad, replacing each undefined
+                        with a definition for bind.</task><br>
+                    <b>Essential:</b>Look at types first and read the hints!
+                    <br>
+                    <task>Task 2: in "src/Exercises.hs" now implement some more characteristic Monad functions,
+                        replacing each undefined with a function definition.</task><br>
+                </p>
+            </div>
+            <!-- <h2>
+                        Example
+                    </h2>
+                    <p>
+                        Consider the following function which takes an Int and returns its half if it is possible:
+                    </p>
+                    <pre><code>half :: Int -> Maybe Int
+half x | even x    = Just (x `div` 2)
+       | otherwise = Nothing</code></pre>
+                    <img src="images/monad.png"/>(from <a href="https://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html">adit.io</a>)
+                    <p>
+                        Now what happens if you call the following:
+                    </p>
+                    <pre><code>*Main> Just 20 >>= half >>= half >>= half</code></pre>
+                    <h2>
+                        Do Notation
+                    </h2>
+                    <p>
+                        The law of associativity allows us to chain operation, to make this process easier on the eye Haskell has the do notation. It is only syntactic sugar to allow chaining monad operation.
+                    </p>
+                    <pre><code>greet = do
+putStrLn "Enter your first then last name"
+first <- getline -- Get user input
+last  <- getline -- Another
+putStrLn ("Your name is " ++ first ++ " " ++ last)</code></pre>
+                    <p>
+                        Is exactly equivalent to:
+                    </p>
+                    <pre><code>greet =
+    putStrLn "Enter two numbers" >> -- Ignore the value of this line
+    getline >>= \first ->              -- Bind user input
+        getline >>= \last ->             -- Again
+            putStrLn ("Your name is " ++ first ++ " " ++ last)</code></pre>
+                </div> -->
+
+            <button class="collapsible">
+                <h1>
+                    Exercise 2: File I/O
+                </h1>
+            </button>
+            <div class="content">
+                <p>
+                    We will be building our first stand-alone Haskell app!
+                    The program will look for a filename as its command line arguments, or if none is specified, will
+                    prompt the user for the filename.
+                </p>
+                <p>
+                    It will expect this file to contain a list of file paths - each on its own line.
+                    We have given you such a file in <code>share/test.txt</code>. It looks like:
+                <pre><code>$ cat share/test.txt
+share/a.txt
+share/b.txt
+share/c.txt</code></pre>
+                </p>
+                <p>
+                    <task>Implement a program that takes a file with a list of files and prints the content of
+                        each of the listed file on the screen
+                        as well as finally reporting the total number of characters in the files</task>
+                </p>
+                <p>
+                    Please implement the functions in the following files:
+                <ol>
+                    <li>supporting functions in <code>src/FileIO.hs</code></li>
+                    <li>user code in <code>app/Main.hs</code>
+                        <ul>
+                            <li><em>This has been implemented for you, but make sure you roughly understand the
+                                    code!</em></li>
+                        </ul>
+                    </li>
+                </ol>
+                </p>
+
+                <p>As usual, you can run the tests in <code>FileIO.hs</code> as follows:
+                <pre><code>$ stack test</code></pre>
+                <p>The code that uses these functions to create a stand-alone program is in <code>app/Main.hs</code>
+                </p>
+                <p>You build the app like this:</p>
+                <pre><code>$ stack build</code></pre>
+                <p>And then to run it use <code>stack exec</code>:</p>
+                <pre><code>$ stack exec printFiles "share/test.txt"
+============ share/a.txt
+Content of a.
+============ share/b.txt
+Content of b.
+============ share/c.txt
+Content of c.
+Characters = 39</code></pre>
+                <p>
+                    If there is no file specified as argument to the program, then it should prompt the user to
+                    enter one:
+                </p>
+                <pre><code>$ stack exec printFiles
+Enter filename: (<- your program's prompt)
+share/test.txt  (<- the user types this)
+============ share/a.txt
+Content of a.
+============ share/b.txt
+Content of b.
+============ share/c.txt
+Content of c.
+Characters = 39</code></pre>
+
+                <p>You can install this handy app so that it's handy in your path:</p>
+                <pre><code>$ stack install
+Copying from C:\Users\...\tute10\.stack-work\install\423b112c\bin\printFiles.exe to C:\Users\tgdwy\AppData\Roaming\local\bin\printFiles.exe
+</code></pre>
+                <p>Then you can run it from anywhere:</p>
+                <pre><code>$ printFiles
+Enter filename:
+...
+</code></pre>
+                <p>So now you can make real programs in Haskell and you never need to use Python again &#x1F603</p>
+            </div>
+            <div class="right-div">
+                <div id="mocha" class="test"></div>
+            </div>
+            <script>
+                // persist vertical scroll position
+                const scrollY = sessionStorage.getItem("scrollY");
+                if (scrollY !== null) {
+                    window.scroll(0, scrollY);
+                }
+                window.onunload = () => sessionStorage.setItem("scrollY", window.scrollY);
+
+                const collapsibles = Array.from(document.getElementsByClassName("collapsible"));
+                // get collapse status
+                const collapseStatus = sessionStorage.getItem("collapseStatus") ?
+                    JSON.parse(sessionStorage.getItem("collapseStatus")) :
+                    collapsibles.map(coll => coll.classList.contains("active"));
+
+                collapsibles.forEach((coll, i) => {
+                    // expand if previously expanded
+                    if (collapseStatus[i]) {
+                        coll.classList.add("active");
+                        const content = coll.nextElementSibling;
+                        content.style.display = "block";
+                    }
+
+                    coll.addEventListener("click", function () {
+                        this.classList.toggle("active")
+                        collapseStatus[i] = !collapseStatus[i];
+                        const content = this.nextElementSibling
+                        content.style.display = collapseStatus[i] ? "block" : "none"
+                        // save collapse status on change
+                        sessionStorage.setItem("collapseStatus", JSON.stringify(collapseStatus));
+                    });
+                });
+
+                // persist dark/light choice in localstorage
+                const checkbox = document.getElementById('light_vs_dark_toggle')
+                const darkCSS = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+                if (darkCSS) {
+                    checkbox.checked = true;
+                }
+
+                checkbox.addEventListener('change', (event) => {
+                    const dark = event.target.checked
+                    document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+                    localStorage.setItem("darkCSS", JSON.stringify(dark))
+                });
+            </script>
+</body>
+
+</html>
