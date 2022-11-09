@@ -1,0 +1,260 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Tutorial 11 + 12 Worksheet</title>
+  <script id="setTheme">
+    const dark = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+    document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+  </script>
+  <link id="style" href="./style.css" rel="stylesheet" />
+  <link href="./libs/mocha.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./libs/dracula.css">
+  <script src="./libs/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+  <script type="text/javascript" async src="./libs/mathjax.js">
+  </script>
+
+</head>
+
+<body>
+  <div class="sliderWrapper">
+    <div>
+      <p>Dark Mode&nbsp;&nbsp;</p>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="light_vs_dark_toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="left-div">
+    <div class="description">
+      <h1>
+        Week 11 + 12 - Parser Combinators
+
+      </h1>
+      <h1>
+        Preamble
+      </h1>
+      <p>
+        For our last two tutorials we will implement a basic Parser Combinator library and use it to build a JSON
+        parser. Parser combinators are a classic example of applying functional programming approaches to standard
+        practices. Please read the <a href="https://tgdwyer.github.io/parsercombinators/">course notes chapter on Parser
+          Combinators</a> before continuing. The definition is:
+      </p>
+      <p>
+        “A parser combinator is a higher-order function that accepts several parsers as input and returns a new parser
+        as its output.” – Wikipedia
+      </p>
+      <p>
+        We have been working for quite a while with functions and how to combine them, parser combinators are one more
+        example of how you can combine operations.
+      </p>
+      <p>
+        The core idea is instead of having a black-box parser, you actually write small parsers for different entities
+        and combine them together to create a parser for a specific format. This pattern is gathering quite a bit of
+        attention as it is way easier to maintain than traditional parsers.
+      </p>
+      <p>
+        To simplify this tute, we have prefilled some of the answers! This will aim to be a reference on how to use the
+        parser, please have a look through and try to understand how these functions work!
+      </p>
+      <button class="collapsible">
+        <h1>
+          Exercise 1: Parser
+        </h1>
+      </button>
+      <div class="content">
+        <p>
+          In this module you will implement the core logic for a parser.
+        </p>
+        <p>
+          A Parser is a new type defined as follows:
+        <pre><code>data Parser a = P { parse :: Input -> ParseResult a }</code></pre>
+        </p>
+        <p>
+          Quite a surprising type at first glance, but worry not. When creating a Parser we are actually creating a
+          function that takes an input and returns the result of parsing the input.
+        </p>
+        <p>
+          Hence, a parser works as follows: consume a character of the input, apply a particular behaviour to it, return
+          a new parser with the rest of the input or fail. Returning a new parser is what makes it a “parser-combinator”
+          as we can chain the behaviours of multiple parsers together.
+        </p>
+        <p>
+          The file <code>Instances.hs</code> contains the definition of <code>Parser</code> and <code>ParseResult</code>
+          and instances of <code>Show</code> for <code>ParseResult</code>, and <code>Functor</code>,
+          <code>Applicative</code> and <code>Monad</code> for <code>Parser</code>. Because our <code>Parser</code> is an
+          instance of <code>Monad</code>, we can use bind <code>(>>=)</code> to chain operations.
+        </p>
+        <p>
+          When using parsers, a natural way to think about their behaviour is to translate it to English.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>English</th>
+              <th>Parser library</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>and then</td>
+              <td>&gt;&gt;=</td>
+            </tr>
+            <tr>
+
+              <td>always</td>
+              <td>pure, return</td>
+            </tr>
+            <tr>
+              <td>or</td>
+              <td>|||</td>
+            </tr>
+            <tr>
+              <td>0 or many</td>
+              <td>list</td>
+            </tr>
+            <tr>
+              <td>1 or many</td>
+              <td>list1</td>
+            </tr>
+            <tr>
+              <td>is</td>
+              <td>is</td>
+            </tr>
+            <tr>
+              <td>exactly n</td>
+              <td>thisMany n</td>
+            </tr>
+            <tr>
+              <td>fail</td>
+              <td>failed</td>
+            </tr>
+            <tr>
+              <td>call it x</td>
+              <td>\x -&gt;, x &lt;-</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <task>
+            First define instances for the parser in Instances.hs
+          </task>
+        </p>
+        <p>
+          <task>
+            Start building your parser by filling in the undefineds in Parser.hs.
+          </task>
+        </p>
+      </div>
+      <!-- <button class="collapsible"><h1>
+                    Exercise 2: JSON Parser
+                </h1></button>
+                <div class="content">
+                <p>
+                    The JSON parser is a specialisation (or combination) of the parser library you wrote in <code>Parser.hs</code>.
+                </p>
+                <p><task>
+                1. Complete the functions in <code>src/JSON.hs</code>.
+              </task></p>
+                <p><task>
+                  2. Implement the <code>main</code> function in <code>app/Main.hs</code> such that the program takes as a JSON filename as argument, and it pretty prints the JSON with new lines after each '[',']','{','}' or ',' and '[' or '{' should increase the indent level while ']' or '}' should decrease the indent level.
+                  You can try it out with the JSON examples in <code>share/</code>.
+
+                  For example, share/films.json should be printed like so:
+                  <pre><code>[
+  {
+    "title": "And Now for Something Completely Different",
+    "year": 1971
+  },
+  {
+    "title": "Monty Python and the Holy Grail",
+    "year": 1975
+  }
+]</code></pre>
+                </task></p>
+              <p><task>
+              3. Write a short 250 word description in the opening comments of the <code>app/Main.hs</code> file.
+            </task></p>
+                </div>
+
+        </div>
+        </div> -->
+      <button class="collapsible">
+        <h1>Exercise 2: Calculator example</h1>
+      </button>
+      <div class="content">
+        <p>
+          The readings for this week refer to parsing arithmetic expressions into an evaluation tree. We have
+          implemented some of the examples into a fully functioning arithmetic parser in Calculator.hs
+        </p>
+        <p>
+          Please have a look at the implementations
+        <ul>
+          <li>Notice how parsers are constructed in increasing complexity by composing simpler, more general parsers
+            together</li>
+          <li>Notice the usage of parser operators and combinators</li>
+          <li>The Monad instance is used predominantly in this example with bind operators (>>). Depending on the
+            parsers you want to write, you may wish to use do-notation, applicative operators/functions, or write your
+            own operators!</li>
+        </ul>
+        </p>
+      </div>
+
+      <div class="right-div">
+        <div id="mocha" class="test"></div>
+      </div>
+      <script>// persist vertical scroll position
+        const scrollY = sessionStorage.getItem("scrollY");
+        if (scrollY !== null) {
+          window.scroll(0, scrollY);
+        }
+        window.onunload = () => sessionStorage.setItem("scrollY", window.scrollY);
+
+        const collapsibles = Array.from(document.getElementsByClassName("collapsible"));
+        // get collapse status
+        const collapseStatus = sessionStorage.getItem("collapseStatus") ?
+          JSON.parse(sessionStorage.getItem("collapseStatus")) :
+          collapsibles.map(coll => coll.classList.contains("active"));
+
+        collapsibles.forEach((coll, i) => {
+          // expand if previously expanded
+          if (collapseStatus[i]) {
+            coll.classList.add("active");
+            const content = coll.nextElementSibling;
+            content.style.display = "block";
+          }
+
+          coll.addEventListener("click", function () {
+            this.classList.toggle("active")
+            collapseStatus[i] = !collapseStatus[i];
+            const content = this.nextElementSibling
+            content.style.display = collapseStatus[i] ? "block" : "none"
+            // save collapse status on change
+            sessionStorage.setItem("collapseStatus", JSON.stringify(collapseStatus));
+          });
+        });
+
+        // persist dark/light choice in localstorage
+        const checkbox = document.getElementById('light_vs_dark_toggle')
+        const darkCSS = localStorage.getItem("darkCSS") ? JSON.parse(localStorage.getItem("darkCSS")) : false;
+        if (darkCSS) {
+          checkbox.checked = true;
+        }
+
+        checkbox.addEventListener('change', (event) => {
+          const dark = event.target.checked
+          document.documentElement.setAttribute('data-theme', dark ? "dark" : "light")
+          localStorage.setItem("darkCSS", JSON.stringify(dark))
+        });
+
+      </script>
+</body>
+
+</html>
